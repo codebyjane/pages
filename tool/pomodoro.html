@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="../design-system.css">
+
+<title>專注追蹤</title>
+
+<style>
+.status{
+    text-align:center;
+    font-size:20px;
+    font-weight:600;
+}
+
+.timer{
+    text-align:center;
+    font-size:88px;
+    font-weight:700;
+    margin:20px 0;
+}
+
+.stats{
+    text-align:center;
+    margin-top:10px;
+    font-size:16px;
+    color:#444;
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+    <div class="page-header">
+        <h1>🍅 專注追蹤 Pomodoro</h1>
+        <div class="subtitle"></div>
+    </div>
+
+    <div class="section">
+		<!-- MODE -->
+		<div class="mode-selector">
+
+			<button class="mode-btn active" data-mode="25-5">25 / 5</button>
+			<button class="mode-btn" data-mode="50-10">50 / 10</button>
+			<button class="mode-btn" data-mode="90-20">90 / 20</button>
+
+		</div>
+
+		<div class="status" id="status" style="text-align:center;font-size:20px;font-weight:600;">工作中</div>
+
+		<div class="timer" id="timer" style="text-align:center;font-size:88px;font-weight:700;margin:20px 0;">25:00</div>
+
+		<div class="stats" style="text-align:center;margin-top:10px;font-size:16px;color:#444;">
+			🍅 今日：<span id="count">0</span> 顆 |
+			⏱ 專注：<span id="focus">0</span> 分鐘
+		</div>
+
+		<div class="timer-actions" style="margin-top:20px;">
+
+			<button class="primary" onclick="start()">開始</button>
+			<button class="secondary" onclick="pause()">暫停</button>
+			<button class="secondary" onclick="reset()">重設</button>
+
+		</div>
+    </div>
+
+</div>
+
+<script>
+
+/* =========================
+   MODE CONFIG
+========================= */
+const MODES = {
+    "25-5": { work: 25*60, break: 5*60 },
+    "50-10": { work: 50*60, break: 10*60 },
+    "90-20": { work: 90*60, break: 20*60 }
+};
+
+/* =========================
+   LOCAL STORAGE KEY
+========================= */
+const DATA_KEY = "pomodoro-data";
+const MODE_KEY = "pomodoro-mode";
+
+/* =========================
+   STATE
+========================= */
+let currentMode =
+    localStorage.getItem(MODE_KEY) || "25-5";
+
+let state = {
+    isWork: true,
+    remaining: MODES[currentMode].work,
+    count: 0,
+    focusMinutes: 0,
+    date: new Date().toDateString()
+};
+
+let timer = null;
+
+/* =========================
+   LOAD DATA
+========================= */
+function load(){
+
+    const saved =
+        JSON.parse(localStorage.getItem(DATA_KEY));
+
+    if(!saved) return;
+
+    // new day reset
+    if(saved.date !== new Date().toDateString()){
+        return;
+    }
+
+    state = saved;
+}
+
+/* =========================
+   SAVE DATA
+========================= */
+function save(){
+    localStorage.setItem(DATA_KEY, JSON.stringify(state));
+}
+
+/* =========================
+   MODE UI SYNC
+========================= */
+function syncModeUI(){
+
+    document.querySelectorAll(".mode-btn")
+    .forEach(btn => {
+
+        btn.classList.toggle(
+            "active",
+            btn.dataset.mode === currentMode
+        );
+
+    });
+
+}
+
+/* =========================
+   RENDER
+========================= */
+function render(){
+
+    const m = Math.floor(state.remaining / 60);
+    const s = state.remaining % 60;
+
+    document.getElementById("timer")
+        .textContent =
+        `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+
+    document.getElementById("count")
+        .textContent = state.count;
+
+    document.getElementById("focus")
+        .textContent = state.focusMinutes;
+
+    document.getElementById("status")
+        .textContent = state.isWork ? "工作中" : "休息中";
+}
+
+/* =========================
+   TICK
+========================= */
+function tick(){
+
+    state.remaining--;
+
+    if(state.isWork){
+        state.focusMinutes = Math.floor(
+            (state.count * MODES[currentMode].work +
+            (MODES[currentMode].work - state.remaining)) / 60
+        );
+    }
+
+    if(state.remaining <= 0){
+        switchPhase();
+    }
+
+    render();
+    save();
+}
+
+/* =========================
+   SWITCH PHASE
+========================= */
+function switchPhase(){
+
+    const config = MODES[currentMode];
+
+    if(state.isWork){
+
+        state.count++;
+
+        if(state.count % 4 === 0){
+            state.remaining = config.break * 3;
+        }else{
+            state.remaining = config.break;
+        }
+
+        state.isWork = false;
+
+    }else{
+
+        state.remaining = config.work;
+        state.isWork = true;
+
+    }
+
+    render();
+    save();
+}
+
+/* =========================
+   CONTROL
+========================= */
+function start(){
+    if(timer) return;
+    timer = setInterval(tick,1000);
+}
+
+function pause(){
+    clearInterval(timer);
+    timer = null;
+    save();
+}
+
+function reset(){
+
+    pause();
+
+    state.remaining =
+        MODES[currentMode].work;
+
+    state.isWork = true;
+
+    state.count = 0;
+    state.focusMinutes = 0;
+
+    render();
+    save();
+}
+
+/* =========================
+   MODE CHANGE
+========================= */
+document.querySelectorAll(".mode-btn")
+.forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        currentMode = btn.dataset.mode;
+
+        localStorage.setItem(MODE_KEY, currentMode);
+
+        syncModeUI();
+
+        reset();
+
+    });
+
+});
+
+/* =========================
+   INIT
+========================= */
+load();
+syncModeUI();
+render();
+
+</script>
+
+</body>
+</html>

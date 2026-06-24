@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="design-system.css">
+
+<title>Dashboard</title>
+
+<style>
+
+/* ===== LAYOUT ===== */
+.app{
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    background:#f5f5f7;
+    overflow-y:auto;
+    border-right:1px solid #e5e5e5;
+    min-width:180px;
+    max-width:400px;
+    resize:horizontal;
+    overflow-x:hidden;
+}
+
+.menu-title{
+    font-size:14px;
+    color:#888;
+    margin:18px 0 8px;
+    padding:8px 16px;
+    cursor:pointer;
+    user-select:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.menu-title::after{
+    content:'▾';
+    font-size:14px;
+    transition:transform 0.2s;
+}
+
+.menu-title.collapsed::after{
+    transform:rotate(-90deg);
+}
+
+.menu{
+    padding:0 12px 8px;
+    overflow:hidden;
+    transition:max-height 0.3s ease;
+    max-height:1000px;
+}
+
+.menu.collapsed{
+    max-height:0;
+    padding:0 12px;
+}
+
+.menu a, .menu-link{
+    display:block;
+    padding:10px 12px;
+    border-radius:10px;
+    text-decoration:none;
+    color:#111;
+    margin-bottom:6px;
+    font-size:14px;
+}
+
+.menu a:hover, .menu-link:hover{
+    background:#e5e5e5;
+}
+
+.menu a.active, .menu-link.active{
+    background:#000;
+    color:#fff;
+}
+
+/* ===== CONTENT ===== */
+.content{
+    flex:1;
+    background:#fff;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
+
+/* TOOL FRAME */
+.tool-frame{
+    flex:1;
+    width:100%;
+    border:none;
+}
+
+/* TOP BAR */
+.topbar{
+    height:50px;
+    border-bottom:1px solid #eee;
+    display:flex;
+    align-items:center;
+    padding:0 16px;
+    font-size:14px;
+    color:#666;
+}
+
+/* ===== SETTINGS ===== */
+.menu-link.danger{
+    color:#d32f2f;
+}
+
+.menu-link.danger:hover{
+    background:#ffebee;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <div class="menu-title" onclick="toggleMenu(this)">🏠 Home</div>
+        <div class="menu">
+            <a href="#" onclick="openTool('tool/exam-countdown.html')">🎓 升學倒數</a>
+        </div>
+
+        <div class="menu-title" onclick="toggleMenu(this)">🧰 Tools</div>
+        <div class="menu">
+            <a href="#" class="menu-link child" onclick="openTool('tool/pomodoro.html')">🍅 專注追蹤</a>
+            <a href="#" class="menu-link child" onclick="openTool('tool/timer.html')">⏳ 倒數計時器</a>
+            <a href="#" class="menu-link child" onclick="openTool('tool/date-countdown.html')">📅 日期倒數</a>
+			<a href="#" class="menu-link child" onclick="openTool('tool/date-time-convert.html')">⏱ 時間轉換</a>
+			<a href="#" class="menu-link child" onclick="openTool('tool/unit-convert.html')">🔄 單位換算</a>
+			<a href="#" class="menu-link child" onclick="openTool('tool/lottery-picker.html')">🎲 線上抽獎</a>
+			
+        </div>
+
+		<div class="menu-title" onclick="toggleMenu(this)">⚙️ Settings</div>
+	    <div class="menu">
+            <a href="#" class="menu-link child danger" onclick="clearAllData()">🗑 清除所有資料</a>
+		</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <iframe id="frame" class="tool-frame"></iframe>
+
+    </div>
+</div>
+
+<script>
+const frame = document.getElementById("frame");
+const title = document.getElementById("title");
+
+/* ===== TOGGLE MENU ===== */
+function toggleMenu(el){
+    el.classList.toggle('collapsed');
+    const menu = el.nextElementSibling;
+    menu.classList.toggle('collapsed');
+}
+
+/* ===== OPEN TOOL ===== */
+function openTool(url){
+
+    frame.src = url;
+
+    //title.innerText = url;
+
+    localStorage.setItem("last-tool", url);
+}
+
+/* ===== INIT ===== */
+(function(){
+
+    const last =
+        localStorage.getItem("last-tool")
+        || "tool/pomodoro.html";
+
+    openTool(last);
+
+})();
+
+/* 清除全部 localstorage（本網站） */
+function clearAllData(){
+
+    const confirmClear =
+        confirm("確定要清除所有資料嗎？此操作無法復原");
+
+    if(!confirmClear) return;
+
+    localStorage.clear();
+
+    alert("已清除所有資料");
+
+    location.reload();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="../design-system.css">
+
+<title>時間轉換</title>
+
+</head>
+
+<body>
+<div class="page">
+
+    <div class="page-header">
+        <h1>⏱ 時間轉換</h1>
+        <div class="subtitle">Timestamp / Date / String 互轉工具</div>
+    </div>
+
+	<!-- 1 -->
+	<div class="section">
+		<h2>Timestamp Long（毫秒）→ Date String</h2>
+
+		<input id="timestampInput" type="number" placeholder="例如：1715572800000">
+
+		<button class="primary" onclick="timestampToDate()">轉換</button>
+		<button class="secondary" onclick="fillNowTimestamp()">現在時間</button>
+
+		<div id="dateResult" class="result"></div>
+	</div>
+
+	<!-- 2 -->
+	<div class="section">
+		<h2>Date String → Timestamp Long</h2>
+
+		<input id="customDateInput" type="text" placeholder="2026-05-15 10:30:45">
+
+		<button class="primary" onclick="customDateToTimestamp()">轉換</button>
+		<button class="secondary" onclick="fillCustomNowDate()">現在時間</button>
+
+		<div id="customTimestampResult" class="result"></div>
+
+		<div class="hint">
+			支援：yyyy-MM-dd HH:mm:ss / yyyyMMdd HH:mm:ss
+		</div>
+	</div>
+
+	<!-- 3 -->
+	<div class="section">
+		<h2>Readable Date → Timestamp Long</h2>
+
+		<input id="dateInput" type="datetime-local" step="1">
+
+		<button class="primary" onclick="dateToTimestamp()">轉換</button>
+		<button class="secondary" onclick="fillNowDate()">現在時間</button>
+
+		<div id="timestampResult" class="result"></div>
+
+		<div class="hint">
+			使用本地時區（台灣 GMT+8）
+		</div>
+	</div>
+
+</div>
+
+<script>
+
+/* ---------- timestamp → date ---------- */
+function timestampToDate(){
+
+    const value =
+        document.getElementById("timestampInput").value;
+
+    const result =
+        document.getElementById("dateResult");
+
+    if(!value){
+        result.innerHTML = "請輸入 timestamp";
+        return;
+    }
+
+    const date = new Date(Number(value));
+
+    result.innerHTML =
+        `本地時間：${format(date)}<br>
+         ISO：${date.toISOString()}`;
+}
+
+/* ---------- date → timestamp ---------- */
+function dateToTimestamp(){
+
+    const value =
+        document.getElementById("dateInput").value;
+
+    const result =
+        document.getElementById("timestampResult");
+
+    const date = new Date(value);
+
+    result.innerHTML =
+        `timestamp(ms)：${date.getTime()}<br>
+         timestamp(s)：${Math.floor(date.getTime()/1000)}`;
+}
+
+/* ---------- string → timestamp ---------- */
+function customDateToTimestamp(){
+
+    const value =
+        document.getElementById("customDateInput").value.trim();
+
+    const result =
+        document.getElementById("customTimestampResult");
+
+    const regex =
+        /^(\d{4})(?:-)?(\d{2})(?:-)?(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/;
+
+    const match = value.match(regex);
+
+    if(!match){
+        result.innerHTML = "格式錯誤";
+        return;
+    }
+
+    const date =
+        new Date(
+            match[1],
+            match[2]-1,
+            match[3],
+            match[4],
+            match[5],
+            match[6]
+        );
+
+    result.innerHTML =
+        `timestamp(ms)：${date.getTime()}<br>
+         timestamp(s)：${Math.floor(date.getTime()/1000)}`;
+}
+
+/* ---------- helpers ---------- */
+function format(d){
+    return d.getFullYear() + "-"
+        + pad(d.getMonth()+1) + "-"
+        + pad(d.getDate()) + " "
+        + pad(d.getHours()) + ":"
+        + pad(d.getMinutes()) + ":"
+        + pad(d.getSeconds());
+}
+
+function pad(n){
+    return String(n).padStart(2,"0");
+}
+
+/* ---------- fill ---------- */
+function fillNowTimestamp(){
+    document.getElementById("timestampInput").value = Date.now();
+}
+
+function fillNowDate(){
+    const d = new Date();
+    document.getElementById("dateInput").value =
+        d.toISOString().slice(0,19);
+}
+
+function fillCustomNowDate(){
+    const d = new Date();
+    document.getElementById("customDateInput").value =
+        format(d);
+}
+
+</script>
+
+</body>
+</html>

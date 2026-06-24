@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="../design-system.css">
+
+<title>升學倒數</title>
+
+<style>
+.title{
+    font-size:28px;
+    font-weight:700;
+    margin-bottom:30px;
+}
+
+.days{
+    font-size:80px;
+    font-weight:800;
+    line-height:1;
+}
+
+.days-label{
+    font-size:20px;
+    color:#666;
+    margin-top:10px;
+}
+
+.time{
+    margin-top:30px;
+    font-size:28px;
+    font-weight:600;
+}
+
+.target-date{
+    margin-top:25px;
+    font-size:16px;
+    color:#888;
+}
+
+.expired{
+    color:#000;
+    font-size:60px;
+}
+
+@media(max-width:900px){
+    .days{
+        font-size:64px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="page-header">
+        <h1>🎓 升學倒數</h1>
+        <div class="subtitle"></div>
+    </div>
+
+    <div class="section grid grid-2">
+
+			<div class="section">
+				<h2 id="name-0"></h2>
+
+				<div class="days" id="days-0">--</div>
+				<div class="days-label">天</div>
+
+				<div class="time" id="time-0">--</div>
+
+				<div class="target-date" id="date-0"></div>
+			</div>
+
+			<div class="section">
+				<h2 id="name-1"></h2>
+
+				<div class="days" id="days-1">--</div>
+				<div class="days-label">天</div>
+
+				<div class="time" id="time-1">--</div>
+
+				<div class="target-date" id="date-1"></div>
+			</div>
+
+    </div>
+
+</div>
+
+<script>
+
+const exams = [
+    {
+        name: "🎓 2027 國中教育會考",
+        date: new Date("2027-05-15T08:00:00")
+    },
+    {
+        name: "📚 2027 學科能力測驗",
+        date: new Date("2027-01-22T08:00:00")
+    }
+];
+
+function renderNames() {
+
+    exams.forEach((exam, index) => {
+
+        const el = document.getElementById(`name-${index}`);
+
+        el.textContent =
+            `${exam.name.toLocaleString('zh-TW')}`;
+    });
+}
+
+function renderDates() {
+
+    exams.forEach((exam, index) => {
+
+        const el = document.getElementById(`date-${index}`);
+
+        el.textContent =
+            `目標日期：${exam.date.toLocaleString('zh-TW')}`;
+    });
+}
+
+function updateCountdown() {
+
+    const now = new Date();
+
+    exams.forEach((exam,index)=>{
+
+        const target = new Date(exam.date);
+
+        const diff = target - now;
+
+        const daysEl =
+            document.getElementById(`days-${index}`);
+
+        const timeEl =
+            document.getElementById(`time-${index}`);
+
+        if(diff <= 0){
+
+            daysEl.innerHTML = "🎉";
+            daysEl.classList.add("expired");
+
+            timeEl.innerHTML = "已到達目標日期";
+
+            return;
+        }
+
+        const days =
+            Math.floor(diff / 86400000);
+
+        const hours =
+            Math.floor(
+                (diff % 86400000) / 3600000
+            );
+
+        const minutes =
+            Math.floor(
+                (diff % 3600000) / 60000
+            );
+
+        const seconds =
+            Math.floor(
+                (diff % 60000) / 1000
+            );
+
+        daysEl.innerHTML = days;
+
+        timeEl.innerHTML =
+            `${hours} 小時 ${minutes} 分 ${seconds} 秒`;
+
+    });
+
+}
+
+renderNames();
+renderDates();
+updateCountdown();
+setInterval(updateCountdown,1000);
+
+</script>
+
+</body>
+</html>

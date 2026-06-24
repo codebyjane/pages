@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="../design-system.css">
+
+<title>單位換算</title>
+</head>
+
+<body>
+<div class="page">
+
+    <div class="page-header">
+        <h1>🔄 單位換算器</h1>
+        <div class="subtitle"></div>
+    </div>
+
+	<!-- 幣值 -->
+	<div class="section">
+		<h2>💰 幣值（固定匯率）</h2>
+
+		<div class="convert-row">
+			<input type="number" id="money-input" placeholder="輸入數值">
+
+			<select id="money-from">
+				<option value="TWD">TWD 台幣</option>
+				<option value="USD">USD 美元</option>
+				<option value="JPY">JPY 日幣</option>
+				<option value="HKD">HKD 港幣</option>
+			</select>
+
+			<span>→</span>
+
+			<select id="money-to">
+				<option value="USD">USD 美元</option>
+				<option value="TWD">TWD 台幣</option>
+				<option value="JPY">JPY 日幣</option>
+				<option value="HKD">HKD 港幣</option>
+			</select>
+		</div>
+
+		<div class="result" id="money-result">--</div>
+
+		<div class="hint">* 使用固定匯率：1 USD = 32 TWD = 150 JPY = 8 HKD</div>
+	</div>
+
+    <div class="section">
+		<h2>📏 長度</h2>
+
+		<div class="convert-row">
+			<input type="number" id="len-input" placeholder="輸入數值">
+
+			<select id="len-from">
+				<option value="mm">mm</option>
+				<option value="cm">cm</option>
+				<option value="m">m</option>
+				<option value="km">km</option>
+			</select>
+
+			<span>→</span>
+
+			<select id="len-to">
+				<option value="cm">cm</option>
+				<option value="mm">mm</option>
+				<option value="m">m</option>
+				<option value="km">km</option>
+			</select>
+		</div>
+
+		<div class="result" id="len-result">--</div>
+    </div>
+	<!-- 重量 -->
+	<div class="section">
+		<h2>⚖️ 重量</h2>
+
+		<div class="convert-row">
+			<input type="number" id="weight-input" placeholder="輸入數值">
+
+			<select id="weight-from">
+				<option value="g">g</option>
+				<option value="kg">kg</option>
+				<option value="lb">lb</option>
+			</select>
+
+			<span>→</span>
+
+			<select id="weight-to">
+				<option value="kg">kg</option>
+				<option value="g">g</option>
+				<option value="lb">lb</option>
+			</select>
+		</div>
+
+		<div class="result" id="weight-result">--</div>
+
+		<div class="hint">* 1 kg = 1000 g ≈ 2.2046 lb（磅）</div>
+	</div>
+
+</div>
+
+<script>
+
+/* ========= 長度 ========= */
+function convertLength(){
+
+    const value = parseFloat(document.getElementById("len-input").value);
+    const from = document.getElementById("len-from").value;
+    const to = document.getElementById("len-to").value;
+
+    if(isNaN(value)) return;
+
+    const map = {
+        mm: 0.001,
+        cm: 0.01,
+        m: 1,
+        km: 1000
+    };
+
+    const meters = value * map[from];
+    const result = meters / map[to];
+
+    document.getElementById("len-result").textContent =
+        `${result.toFixed(4)} ${to}`;
+}
+
+/* ========= 重量 ========= */
+function convertWeight(){
+
+    const value = parseFloat(document.getElementById("weight-input").value);
+    const from = document.getElementById("weight-from").value;
+    const to = document.getElementById("weight-to").value;
+
+    if(isNaN(value)) return;
+
+    const map = {
+        g: 1,
+        kg: 1000,
+        lb: 453.592
+    };
+
+    const grams = value * map[from];
+    const result = grams / map[to];
+
+    document.getElementById("weight-result").textContent =
+        `${result.toFixed(4)} ${to}`;
+}
+
+/* ========= 幣值 ========= */
+function convertMoney(){
+
+    const value = parseFloat(document.getElementById("money-input").value);
+    const from = document.getElementById("money-from").value;
+    const to = document.getElementById("money-to").value;
+
+    if(isNaN(value)) return;
+
+    const rate = {
+        USD: 1,
+        TWD: 32,
+        JPY: 150,
+		HKD: 8
+    };
+
+    const usd = value / rate[from];
+    const result = usd * rate[to];
+
+    document.getElementById("money-result").textContent =
+        `${result.toFixed(2)} ${to}`;
+}
+
+/* ========= events ========= */
+document.querySelectorAll("input, select")
+.forEach(el => {
+    el.addEventListener("input", () => {
+        convertLength();
+        convertWeight();
+        convertMoney();
+    });
+});
+
+</script>
+
+</body>
+</html>
